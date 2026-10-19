@@ -1,0 +1,9 @@
+{
+  "name": "hexlands-mp",
+  "version": "1.0.0",
+  "description": "Hexlands: server-authoritative multiplayer hex-island settlement game",
+  "main": "server.js",
+  "scripts": { "start": "node server.js" },
+  "dependencies": { "ws": "^8.18.0" },
+  "engines": { "node": ">=18" }
+}
