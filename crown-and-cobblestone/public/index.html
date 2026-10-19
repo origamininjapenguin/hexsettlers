@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#181712">
+  <title>Crown &amp; Cobblestone — A Realm to Build</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=IM+Fell+English:ital@0;1&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <main id="app">
+    <section id="lobby" class="lobby-screen">
+      <div class="lobby-backdrop"></div>
+      <div class="lobby-card">
+        <div class="crest">✦</div>
+        <p class="eyebrow">A MEDIEVAL REALM-BUILDING GAME</p>
+        <h1>Crown <span>&amp;</span><br>Cobblestone</h1>
+        <p class="lobby-subtitle">Gather your companions. Raise a kingdom.</p>
+        <label class="field-label" for="playerName">Your name</label>
+        <input id="playerName" maxlength="18" autocomplete="nickname" placeholder="e.g. Rowan of the Vale">
+        <div class="lobby-actions">
+          <button id="createRoom" class="button button-gold">Found a new table <span>→</span></button>
+          <div class="join-row">
+            <input id="roomCode" maxlength="4" placeholder="ROOM CODE" aria-label="Room code">
+            <button id="joinRoom" class="button button-outline">Join table</button>
+          </div>
+        </div>
+        <p class="lobby-note">2–4 players · Private room codes · Best played with sound</p>
+      </div>
+      <div class="lobby-footer">An original, unofficial game inspired by classic hex-based settlement games.</div>
+    </section>
+
+    <section id="waiting" class="waiting-screen hidden">
+      <div class="waiting-card parchment">
+        <div class="crest small">✦</div>
+        <p class="eyebrow">YOUR FELLOWS AWAIT</p>
+        <h2>Gather at the table</h2>
+        <p class="muted">Share this room code with the other players.</p>
+        <button id="copyCode" class="room-code"><span id="waitingCode">----</span><small>CLICK TO COPY</small></button>
+        <div id="lobbyRoster" class="lobby-roster"></div>
+        <button id="startGame" class="button button-gold hidden">Begin the founding <span>→</span></button>
+        <p id="waitingHint" class="lobby-note">Waiting for the host to begin…</p>
+        <button id="leaveRoom" class="text-button">Leave table</button>
+      </div>
+    </section>
+
+    <section id="game" class="game-screen hidden">
+      <div class="game-topbar">
+        <div class="brand-mark"><span class="brand-crest">✦</span><div><strong>CROWN &amp; COBBLESTONE</strong><small>THE NORTHERN MARCHES</small></div></div>
+        <div class="turn-indicator"><span class="turn-dot"></span><span id="turnText">Founding the realm</span><span id="roomBadge" class="room-badge"></span></div>
+        <div class="top-actions"><button id="musicToggle" class="icon-button" title="Toggle medieval music" aria-label="Toggle music">♫<span>Music</span></button><button id="helpToggle" class="icon-button" title="How to play" aria-label="How to play">ⓘ<span>Rules</span></button><button id="exitGame" class="icon-button" title="Leave table" aria-label="Leave table">↗<span>Leave</span></button></div>
+      </div>
+      <div class="game-layout">
+        <section class="board-stage">
+          <canvas id="boardCanvas" aria-label="Interactive 3D game board"></canvas>
+          <div class="stage-shade"></div>
+          <div class="board-caption"><span class="caption-star">✦</span><div><strong>THE SETTLED ISLES</strong><small>LANDS OF THE NORTHERN SEA</small></div></div>
+          <div id="hint" class="interaction-hint hidden"></div>
+          <div id="diceResult" class="dice-result hidden"><span class="dice-orbit">✦</span><strong id="diceTotal">—</strong><small id="diceCaption">THE HARVEST</small></div>
+          <div class="stage-legend"><span><i class="legend-dot forest"></i>Lumber</span><span><i class="legend-dot grain"></i>Grain</span><span><i class="legend-dot wool"></i>Wool</span><span><i class="legend-dot ore"></i>Ore</span><span><i class="legend-dot brick"></i>Brick</span></div>
+          <div id="resourceDock" class="resource-dock" aria-label="Your resources"></div>
+        </section>
+        <aside class="game-sidebar">
+          <section class="side-card turn-card">
+            <p class="eyebrow">THE COUNCIL</p><h2>Realm at a glance</h2>
+            <div id="playerList" class="player-list"></div>
+            <div class="award-row"><div class="award-seal">⚔</div><div><strong>Largest Army</strong><small id="armyHolder">Unclaimed · 3 knights</small></div><b id="armyScore">+2</b></div>
+            <div class="award-row"><div class="award-seal road-seal">⌁</div><div><strong>Longest Road</strong><small id="roadHolder">Unclaimed · 5 roads</small></div><b id="roadScore">+2</b></div>
+          </section>
+          <section class="side-card hand-card">
+            <div class="section-heading"><div><p class="eyebrow">YOUR STORES</p><h2>At hand</h2></div><span id="handTotal" class="hand-total">0 cards</span></div>
+            <div id="resourceList" class="resource-list"></div>
+            <div class="action-separator"></div>
+            <p class="eyebrow">ACTIONS</p>
+            <div class="action-grid">
+              <button class="action-button" data-mode="road"><span class="action-icon">⌁</span><span><strong>Road</strong><small>1 Lumber · 1 Brick</small></span></button>
+              <button class="action-button" data-mode="settlement"><span class="action-icon">⌂</span><span><strong>Settlement</strong><small>1 each of four</small></span></button>
+              <button class="action-button" data-mode="city"><span class="action-icon">♜</span><span><strong>City</strong><small>2 Grain · 3 Ore</small></span></button>
+              <button id="buyDev" class="action-button"><span class="action-icon">✧</span><span><strong>Development</strong><small>1 Wool · Grain · Ore</small></span></button>
+            </div>
+            <div class="utility-actions"><button id="rollDice" class="button button-gold roll-button">⚄ &nbsp; Roll the dice</button><button id="bankTrade" class="button button-outline">Trade with the bank</button><button id="endTurn" class="button button-dark">End your turn <span>→</span></button></div>
+            <div id="devHand" class="dev-hand"></div>
+          </section>
+          <section class="side-card journal-card">
+            <div class="section-heading"><div><p class="eyebrow">THE CHRONICLE</p><h2>Recent deeds</h2></div><span class="journal-mark">✦</span></div>
+            <div id="eventLog" class="event-log"></div>
+          </section>
+          <section class="side-card chat-card">
+            <div class="section-heading"><div><p class="eyebrow">THE COMMON ROOM</p><h2>Table chat</h2></div></div>
+            <div id="chatFeed" class="chat-feed"></div>
+            <form id="chatForm" class="chat-form"><input id="chatInput" maxlength="180" placeholder="Send a message…" autocomplete="off"><button aria-label="Send message">↗</button></form>
+          </section>
+        </aside>
+      </div>
+      <div id="toast" class="toast hidden"></div>
+      <div id="modalBackdrop" class="modal-backdrop hidden"><div id="modal" class="modal-card parchment"></div></div>
+    </section>
+  </main>
+  <script src="/socket.io/socket.io.js"></script>
+  <script type="module" src="/client.js"></script>
+</body>
+</html>
