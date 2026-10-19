@@ -6,9 +6,8 @@ A browser-based, 2–4 player medieval settlement-building game. It uses Node.js
 
 1. Install Node.js 18 or newer.
 2. Extract this folder from the ZIP.
-3. Open a terminal in the extracted `crown-and-cobblestone` folder.
-4. Run `npm install` and then `npm start`.
-5. Open [http://localhost:3000](http://localhost:3000), create a table, and share its four-character code.
+3. On Windows, double-click `start-windows.bat` (it installs dependencies the first time). On macOS/Linux, open a terminal in this folder and run `npm install` followed by `npm start`.
+4. Open [http://localhost:3000](http://localhost:3000), create a table, and share its four-character code. Do not open `public/index.html` directly; the game needs the Node server running.
 
 The server listens on port 3000 by default. Set the `PORT` environment variable to use another port. For internet play, host the Node server behind HTTPS and allow WebSocket upgrades through your reverse proxy. For play on a local network, other players can open the host computer's LAN address on port 3000.
 
@@ -34,5 +33,6 @@ The game includes the classic five-resource economy, settlements and city upgrad
 - `public/style.css` — responsive medieval parchment and dark-wood styling.
 - `public/client.js` — Three.js board, generated models, interaction, and Tone.js music.
 - `package.json` — Node.js dependencies and start command.
+- `start-windows.bat` — installs dependencies if needed, starts the server and opens the game in your browser.
 
 This is an original, unofficial project. It uses no official board-game art, logos, card text or sound recordings and is not affiliated with or endorsed by the makers of CATAN.

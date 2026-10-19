@@ -1,5 +1,5 @@
 import * as THREE from '/node_modules/three/build/three.module.js';
-import * as Tone from '/node_modules/tone/build/esm/index.js';
+let Tone = null;
 
 const TYPES = ['lumber','wool','grain','brick','ore'];
 const TYPE_LABEL = { lumber:'Lumber', wool:'Wool', grain:'Grain', brick:'Brick', ore:'Ore' };
@@ -9,21 +9,30 @@ const $ = id => document.getElementById(id);
 const socket = io();
 let myId = null, roomCode = '', hostId = null, snapshot = null, mode = null;
 let noticeTimer = 0, discardOpen = false, audioOn = false, musicLoop = null, audioSynth = null, rollSeen = null;
+let pendingJoin = null;
 
 const lobby = $('lobby'), waiting = $('waiting'), gameScreen = $('game');
 function show(el) { [lobby,waiting,gameScreen].forEach(x => x.classList.toggle('hidden', x !== el)); }
 function toast(message) { const el = $('toast'); el.textContent = message; el.classList.remove('hidden'); clearTimeout(noticeTimer); noticeTimer = setTimeout(() => el.classList.add('hidden'), 2800); }
+function setServerStatus(message, offline=false) { const el=$('serverStatus'); if(el){el.textContent=message;el.classList.toggle('offline',offline);} }
 function connectRoom(code) {
   const name = $('playerName').value.trim() || 'Traveler';
   const reconnectToken = code ? localStorage.getItem(`cc:${code}:token`) : null;
-  socket.emit('joinRoom', { name, code: code || undefined, reconnectToken: reconnectToken || undefined });
+  pendingJoin = { name, code: code || undefined, reconnectToken: reconnectToken || undefined };
+  $('createRoom').disabled = $('joinRoom').disabled = true;
+  setServerStatus('Connecting to the game server…');
+  if(socket.connected) sendPendingJoin(); else socket.connect();
 }
+function sendPendingJoin() { if(!pendingJoin||!socket.connected)return; socket.emit('joinRoom',pendingJoin); setServerStatus('Server connected. Opening your table…'); }
 $('createRoom').onclick = () => connectRoom('');
 $('joinRoom').onclick = () => { const code = $('roomCode').value.trim().toUpperCase(); if (!code) return toast('Enter a room code first.'); connectRoom(code); };
 $('roomCode').addEventListener('input', e => { e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,4); });
 $('playerName').addEventListener('keydown', e => { if (e.key === 'Enter') connectRoom(''); });
-socket.on('joined', data => { roomCode = data.code; myId = data.playerId; hostId = data.hostId; if(data.reconnectToken)localStorage.setItem(`cc:${roomCode}:token`,data.reconnectToken); $('waitingCode').textContent = roomCode; $('roomBadge').textContent = `TABLE ${roomCode}`; show(waiting); });
-socket.on('notice', data => toast(data.message));
+socket.on('connect', () => { setServerStatus('Game server connected. Found a new table or enter a room code.'); sendPendingJoin(); });
+socket.on('connect_error', () => { setServerStatus('Can’t reach the game server. Run npm install, then npm start, and open http://localhost:3000.',true); $('createRoom').disabled = $('joinRoom').disabled = false; toast('Game server is offline. See the message below the room buttons.'); });
+socket.on('disconnect', () => { if(roomCode)toast('Connection lost. Reopen the table to reconnect.'); else setServerStatus('Disconnected from the game server. Try again after it starts.',true); });
+socket.on('joined', data => { pendingJoin=null; $('createRoom').disabled = $('joinRoom').disabled = false; roomCode = data.code; myId = data.playerId; hostId = data.hostId; if(data.reconnectToken)localStorage.setItem(`cc:${roomCode}:token`,data.reconnectToken); $('waitingCode').textContent = roomCode; $('roomBadge').textContent = `TABLE ${roomCode}`; show(waiting); });
+socket.on('notice', data => { pendingJoin=null; $('createRoom').disabled = $('joinRoom').disabled = false; setServerStatus('Game server connected. Found a new table or enter a room code.'); toast(data.message); });
 socket.on('gameState', data => {
   roomCode = data.code; hostId = data.hostId; const oldRoll = snapshot?.game?.roll ? `${snapshot.game.turn}-${snapshot.game.roll.join('-')}` : null; snapshot = data;
   if (!data.game) { show(waiting); renderLobby(data); return; }
@@ -35,6 +44,7 @@ socket.on('gameState', data => {
   if (data.game.phase === 'robber') { mode = 'robber'; $('hint').textContent = 'Choose a new land tile for the robber'; $('hint').classList.remove('hidden'); }
 });
 socket.on('chatMessage', m => addChat(m.name, m.text, m.color));
+window.__ccClientReady = true;
 function renderLobby(data) {
   $('waitingCode').textContent = data.code;
   const roster = $('lobbyRoster'); roster.replaceChildren();
@@ -295,6 +305,7 @@ function chooseRobberVictim(hexId){const g=snapshot.game,h=g.board.hexes[hexId];
 
 async function toggleMusic(){
   try{
+    Tone ||= await import('/node_modules/tone/build/esm/index.js');
     await Tone.start();if(!audioSynth){audioSynth=new Tone.PolySynth(Tone.Synth,{oscillator:{type:'triangle'},envelope:{attack:.08,decay:.24,sustain:.2,release:1.1}});const reverb=new Tone.Reverb({decay:3.4,wet:.42}).toDestination();audioSynth.connect(reverb);audioSynth.volume.value=-19;}
     if(audioOn){Tone.Transport.stop();if(musicLoop)musicLoop.dispose();musicLoop=null;audioOn=false;$('musicToggle').classList.remove('music-on');toast('The minstrels fall quiet.');return;}
     const notes=['G4','D5','B4','D5','A4','E5','C5','D5','G4','B4','D5','B4','A4','D5','F#5','E5'];

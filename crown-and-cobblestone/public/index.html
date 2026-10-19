@@ -9,6 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=IM+Fell+English:ital@0;1&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/style.css">
+  <style>.server-status{font-size:10px;color:#9eae77;margin:8px 0 -8px;min-height:14px}.server-status.offline{color:#e19b79}</style>
 </head>
 <body>
   <main id="app">
@@ -28,6 +29,7 @@
             <button id="joinRoom" class="button button-outline">Join table</button>
           </div>
         </div>
+        <p id="serverStatus" class="server-status">Connecting to the game server…</p>
         <p class="lobby-note">2–4 players · Private room codes · Best played with sound</p>
       </div>
       <div class="lobby-footer">An original, unofficial game inspired by classic hex-based settlement games.</div>
@@ -100,6 +102,19 @@
     </section>
   </main>
   <script src="/socket.io/socket.io.js"></script>
+  <script>
+    (() => {
+      window.__ccClientReady = false;
+      window.setTimeout(() => {
+        if (window.__ccClientReady) return;
+        const status = document.getElementById('serverStatus');
+        const help = () => window.alert('The game interface or server dependencies did not load. Start it from the extracted project folder with: npm install, then npm start. Open http://localhost:3000 (do not open index.html directly).');
+        if (status) { status.textContent = 'Game interface not connected. Start the Node server, then open http://localhost:3000.'; status.classList.add('offline'); }
+        document.getElementById('createRoom')?.addEventListener('click', help);
+        document.getElementById('joinRoom')?.addEventListener('click', help);
+      }, 2200);
+    })();
+  </script>
   <script type="module" src="/client.js"></script>
 </body>
 </html>
