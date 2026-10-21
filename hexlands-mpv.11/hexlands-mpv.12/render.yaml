@@ -1,9 +1,0 @@
-# Optional Render Blueprint. If this project lives in a sub-folder of your repo, add:  rootDir: hexlands-mp
-services:
-  - type: web
-    name: hexlands
-    runtime: node
-    plan: free
-    buildCommand: npm install
-    startCommand: npm start
-    healthCheckPath: /healthz
