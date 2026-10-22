@@ -1,0 +1,13 @@
+{
+  "name": "hexlands-mp",
+  "version": "1.2.2",
+  "description": "Hexlands Online: server-authoritative medieval multiplayer settlement game",
+  "main": "server.js",
+  "scripts": { "start": "node server.js" },
+  "dependencies": {
+    "tone": "^14.8.49",
+    "three": "^0.180.0",
+    "ws": "^8.18.0"
+  },
+  "engines": { "node": ">=18" }
+}
