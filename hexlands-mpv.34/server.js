@@ -15,7 +15,7 @@ function sync(r){if(!r.live)return;const specs=JSON.stringify(r.spectators.filte
 function botChat(r,i,action){
 if(!r.bc)return;
 const now=Date.now();if(now-(r.botChatAt||0)<7000)return;
-const bots=r.gs.map((p,index)=>({p,index})).filter(x=>x.p&&x.p.ai);if(!bots.length)return;
+const bots=r.gs.map((p,index)=>({p,index})).filter(x=>x.p&&x.p.k==='bot');if(!bots.length)return;
 let speakers=bots.filter(x=>x.index!==r.botChatLastSpeaker);if(!speakers.length)speakers=bots;
 const speaker=speakers[rnd(speakers.length)],p=speaker.p,a=String(action||'').toLowerCase();
 const lines={
